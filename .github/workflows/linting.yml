@@ -24,7 +24,7 @@ jobs:
                   pip install flake8
             - name: Lint with flake8
               run: |
-                  git diff --name-only --diff-filter=AM origin/master | grep .py$ | xargs flake8 --max-line-length=79 --ignore=E203,E266,E501,W503 --exclude=__init__.py
+                  flake8 ./src --count --ignore=E501,E203,W503 --max-complexity=10 --max-line-length=79 --statistics
                   if [ $? -eq 1 ]; then exit 1; fi
                 
 
