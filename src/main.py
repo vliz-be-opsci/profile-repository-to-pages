@@ -15,7 +15,9 @@ logger = get_logger()
 # set the location of the src folder
 # check if the data folder exists
 if not os.path.isdir("data"):
-    logger.error("Data folder not found. Please make sure it exists in src/data")
+    logger.error(
+        "Data folder not found. Please make sure it exists in src/data"
+    )
     sys.exit(1)
 
 logger.info("Start of gh-pages build")

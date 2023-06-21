@@ -1,26 +1,25 @@
-#this file will contain all functions that will be important to get info from a json file 
-import csv
-import json
-from utils.singleton.location import Location
+# this file will contain all functions that will be important to get info from a json file
 from utils.singleton.logger import get_logger
 
 logger = get_logger()
 
+
 def has_conformsTo_prop(json_data):
     try:
         for entry in json_data["@graph"]:
-            #check if entry contains conformsTo, if it does check if it is an array and if it is check if it contains Profile or Dataset
+            # check if entry contains conformsTo, if it does check if it is an array and if it is check if it contains Profile or Dataset
             if "conformsTo" in entry:
-                return True 
+                return True
     except Exception as e:
         logger.error(f"Error while getting conformsTo of json file: {e}")
         return None
-    
+
+
 def get_cornformTo_uris(json_data):
     try:
         uris = []
         for entry in json_data["@graph"]:
-            #check if entry contains conformsTo, if it does check if it is an array and if it is check if it contains Profile or Dataset
+            # check if entry contains conformsTo, if it does check if it is an array and if it is check if it contains Profile or Dataset
             if "conformsTo" in entry:
                 if type(entry["conformsTo"]) == list:
                     for conformity in entry["conformsTo"]:
@@ -34,7 +33,8 @@ def get_cornformTo_uris(json_data):
     except Exception as e:
         logger.error(f"Error while getting conformsTo prop of json file: {e}")
         return None
-    
+
+
 def is_profile(json_data):
     try:
         for entry in json_data["@graph"]:
@@ -44,11 +44,12 @@ def is_profile(json_data):
                         return True
             else:
                 if entry["@type"] == "Profile":
-                    return True 
+                    return True
     except Exception as e:
         logger.error(f"Error while getting type of json file: {e}")
         return None
-    
+
+
 def get_profile_prop(json_data):
     try:
         for entry in json_data["@graph"]:
@@ -64,22 +65,23 @@ def get_profile_prop(json_data):
     except Exception as e:
         logger.error(f"Error while getting type of json file: {e}")
         return None
-    
+
+
 def get_metadata_profile(json_data):
-    '''
-    This function will return the metadata of a json file. 
-    This includes: 
-        - "author": list of strings or string 
+    """
+    This function will return the metadata of a json file.
+    This includes:
+        - "author": list of strings or string
         - "description": string
         - "keywords": list of strings or string
         - "license": dict with @id key with value string
         - "name": string
-        - "version": string 
+        - "version": string
     These properties should be located in the @id: ./
     The return is a dict with the above keys and values. If a key is not found, the value will be None
     :param json_data: json data
     :return: dict with metadata
-    '''
+    """
     try:
         for entry in json_data["@graph"]:
             if entry["@id"] == "./":
