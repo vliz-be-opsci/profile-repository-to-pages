@@ -5,6 +5,6 @@ select ?candidate where {
     [] schema:about ?rocrate .}
     UNION
     {[] schema:hasPart/schema:itemListElement ?candidate .}
-    # UNION
-    # [] schema:hasPart ?candidate .
+    UNION
+    {[] schema:hasPart ?candidate .}
 }

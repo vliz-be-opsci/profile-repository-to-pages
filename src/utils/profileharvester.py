@@ -4,6 +4,9 @@ import requests
 import rdflib
 import time
 from utils.singleton.logger import get_logger
+from utils.singleton.location import Location
+import os
+import sys
 
 logger = get_logger()
 
@@ -28,7 +31,7 @@ class ProfileHarvester:
         while self.check_again:
             self.check_entry_uri_content_and_type()
 
-        if self.entry_uri_type == None:
+        if self.entry_uri_type is None:
             self.bad_entry_uri = True
 
         self.insert_metadata()
@@ -90,42 +93,51 @@ class ProfileHarvester:
                 self.bad_entry_uri = True
                 break
 
-        if self.entry_uri_type == None:
+        if self.entry_uri_type is None:
             logger.debug(
                 "trying to get metadata from entry_uri {0} with mimetype {1}".format(
                     self.entry_uri, "text/html"
                 )
             )
-            # first look into header of the uri
-            headers = response.headers
-            logger.debug("headers: {0}".format(headers))
-            if "Link" in headers:
-                for link in headers["Link"].split(","):
-                    if "rel=describedby" in link:
-                        self.check_again = True
-                        uri_link = (
-                            link.split(" ")[0]
-                            .replace("<", "")
-                            .replace(">", "")
-                        )
-
-                        if uri_link.startswith("./"):
-                            self.entry_uri = self.entry_uri + uri_link[1:]
-                        else:
-                            self.entry_uri = uri_link
-                        logger.debug(
-                            "entry_uri changed to {0}".format(self.entry_uri)
-                        )
-                        # check if type is in link
-                        if "type=" in link:
-                            typee = (
-                                link.split("type=")[1]
-                                .split(" ")[0]
-                                .replace('"', "")
+            try:
+                # first look into header of the uri
+                headers = response.headers
+                logger.debug("headers: {0}".format(headers))
+                if "Link" in headers:
+                    for link in headers["Link"].split(","):
+                        if "rel=describedby" in link:
+                            self.check_again = True
+                            uri_link = (
+                                link.split(" ")[0]
+                                .replace("<", "")
+                                .replace(">", "")
                             )
-                            if typee in mime_types:
-                                self.entry_uri_type = typee
-                                break
+
+                            if uri_link.startswith("./"):
+                                self.entry_uri = self.entry_uri + uri_link[1:]
+                            else:
+                                self.entry_uri = uri_link
+                            logger.debug(
+                                "entry_uri changed to {0}".format(
+                                    self.entry_uri
+                                )
+                            )
+                            # check if type is in link
+                            if "type=" in link:
+                                typee = (
+                                    link.split("type=")[1]
+                                    .split(" ")[0]
+                                    .replace('"', "")
+                                )
+                                if typee in mime_types:
+                                    self.entry_uri_type = typee
+                                    break
+            except Exception as e:
+                logger.exception(
+                    msg="Error getting metadata from entry_uri {0} with mimetype {1} : {2}".format(
+                        self.entry_uri, "text/html", str(e)
+                    )
+                )
 
             try:
                 response = requests.get(self.entry_uri)
@@ -250,10 +262,18 @@ class ProfileHarvester:
             # [] schema:hasPart ?candidate .
         }
         """
-        query = """
-        prefix prof: <http://www.w3.org/ns/dx/prof/>
-        select ?profile where { ?profile a prof:Profile . }
-        """
+        if not os.path.isfile(
+            os.path.join(
+                Location().get_location(), "templates", "profiles.sparql"
+            )
+        ):
+            logger.error("Template file does not exist")
+            sys.exit(1)
+        query = open(
+            os.path.join(
+                Location().get_location(), "templates", "profiles.sparql"
+            )
+        ).read()
         # before doing the queries change the kg to have the entry_uri as base_uri instead of the file uri
         self.kg
 
@@ -267,15 +287,23 @@ class ProfileHarvester:
                 self.profiles.add(result[0])
             return
 
-        query = """
-        prefix schema: <http://schema.org/>
-        select ?candidate where {
-            {?rocrate schema:conformsTo ?candidate .
-            [] schema:about ?rocrate .}
-            UNION
-            {[] schema:hasPart/schema:itemListElement ?candidate .}
-        }
-        """
+        if not os.path.isfile(
+            os.path.join(
+                Location().get_location(),
+                "templates",
+                "candidate_profiles.sparql",
+            )
+        ):
+            logger.error("Template file does not exist")
+            sys.exit(1)
+        query = open(
+            os.path.join(
+                Location().get_location(),
+                "templates",
+                "candidate_profiles.sparql",
+            )
+        ).read()
+
         results = self.kg.query(query)
         if len(results) > 0:
             # the results are uri that also need to be checked for profiles so we spawn a child thread for each
@@ -313,18 +341,22 @@ class ProfileHarvester:
         # first get the complete kg
         c_kg = self.getCompleteKG()
         # run query that will extract the triples that we need , check for each of the triples if they exist if not return empty string
-        query = """
-        prefix prof: <http://www.w3.org/ns/dx/prof/>
-        prefix schema: <http://schema.org/>
-        select ?profile ?name ?description ?version ?keywords ?license where {
-            ?profile a prof:Profile .
-            OPTIONAL { ?profile schema:name ?name . }
-            OPTIONAL { ?profile schema:description ?description . }
-            OPTIONAL { ?profile schema:version ?version . }
-            OPTIONAL { ?profile schema:keywords ?keywords . }
-            OPTIONAL { ?profile schema:license ?license . }
-        }    
-        """
+        if not os.path.isfile(
+            os.path.join(
+                Location().get_location(),
+                "templates",
+                "get_metadata_kg_profiles.sparql",
+            )
+        ):
+            logger.error("Template file does not exist")
+            sys.exit(1)
+        query = open(
+            os.path.join(
+                Location().get_location(),
+                "templates",
+                "get_metadata_kg_profiles.sparql",
+            )
+        ).read()
         results = c_kg.query(query)
         toreturn = {}
         for result in results:
@@ -333,7 +365,21 @@ class ProfileHarvester:
             p_dict["name"] = result[1]
             p_dict["description"] = result[2]
             p_dict["version"] = result[3]
-            p_dict["keywords"] = result[4]
+            # split the keywords and authors by | and add them as list to the dict
+            # , if empty string then "" , make sure all values are strings and unique
+            keywords = result[4].split("|")
+            # make sure all values are strings and unique
+            u_keywords = list(set([str(x) for x in keywords]))
+            if len(u_keywords) == 0 or u_keywords == [""]:
+                u_keywords = None
+            p_dict["keywords"] = u_keywords
             p_dict["license"] = result[5]
+            authors = result[6].split("|")
+            u_authors = list(set([str(x) for x in authors]))
+            if len(u_authors) == 1:
+                u_authors = u_authors[0]
+            if len(u_authors) == 0:
+                u_authors = None
+            p_dict["authors"] = u_authors
             toreturn[uri] = p_dict
         return toreturn

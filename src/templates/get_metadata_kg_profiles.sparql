@@ -1,0 +1,14 @@
+prefix prof: <http://www.w3.org/ns/dx/prof/>
+prefix schema: <http://schema.org/>
+
+SELECT ?profile ?name ?description ?version (GROUP_CONCAT(?keyword; separator="|") as ?keywords) ?license (GROUP_CONCAT(?author; separator="|") as ?authors)
+WHERE {
+?profile a prof:Profile .
+OPTIONAL { ?profile schema:name ?name . }
+OPTIONAL { ?profile schema:description ?description . }
+OPTIONAL { ?profile schema:version ?version . }
+OPTIONAL { ?profile schema:keywords ?keyword . }
+OPTIONAL { ?profile schema:license ?license . }
+OPTIONAL { ?profile schema:author ?author . }
+}
+GROUP BY ?profile ?name ?description ?version ?license
