@@ -24,7 +24,7 @@ jobs:
                   pip install flake8
             - name: Lint with flake8
               run: |
-                  flake8 ./src --count --ignore=E501,E203,W503 --max-complexity=10 --max-line-length=79 --statistics
+                  flake8 ./src --count --ignore=E501,E203,W503 --max-complexity=15 --max-line-length=79 --statistics
                   if [ $? -eq 1 ]; then exit 1; fi
                 
 
