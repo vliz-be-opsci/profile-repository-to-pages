@@ -110,9 +110,24 @@ class Registry:
             )
             logger.info(f"Harvestor for {entry['URI']} has run")
             harvested_info = entry_harvestor.getListDictsProfiles()
+
+            # for profile_uri , info in harvested_info.items(): => self.KnowledgeGraphRegistry.addProfile(profile_uri)
+            to_add_harvested_info = {}
+            for profile_uri, info in harvested_info.items():
+                self.knowledge_graph_registry.addProfile(profile_uri)
+
+                # check if profile_uri / last part has a "." in it to check if its a file , if so then make new uri that is the same but without the file extension
+                if profile_uri.split("/")[-1].find(".") != -1:
+                    profile_uri_list = profile_uri.split("/")[0:-1]
+                    new_profile_uri = "/".join(profile_uri_list)
+                else:
+                    new_profile_uri = profile_uri
+
+                to_add_harvested_info[new_profile_uri] = info
+
             # ppritn the harvested info
-            logger.info(json.dumps(harvested_info, indent=4))
-            self.profile_metadate_dicts.update(harvested_info)
+            logger.info(json.dumps(to_add_harvested_info, indent=4))
+            self.profile_metadate_dicts.update(to_add_harvested_info)
 
     def make_entries_array(self):
         """
@@ -186,7 +201,8 @@ class Registry:
 
     def make_html_file_registry(self):
         logger.info("Making html file")
-
+        logger.info(json.dumps(self.profile_metadate_dicts, indent=4))
+        
         try:
             kwargs = {
                 "title": "Test Profile registry",
