@@ -7,6 +7,8 @@ ls -a
 
 #echo repo name that called this action
 echo "repo name is " $GITHUB_REPOSITORY
+echo "base uri given is " $INPUT_BASEURI
+
 
 tree -a ./src
 
@@ -31,7 +33,7 @@ pip install -r requirements.txt
 
 #run the python script
 cd src/
-python main.py
+python main.py $INPUT_BASEURI
 cd ..
 
 #make a folder in ./github/workspace called unicornpages

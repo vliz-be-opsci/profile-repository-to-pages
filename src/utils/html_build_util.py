@@ -111,3 +111,24 @@ def make_html_file(template_file, **kwargs):
         )
         sys.exit(1)
     return html
+
+def addBaseToRegistry(base):
+    """
+    This function will add the @base string to the beginning of the registry.ttl document located in the build folder
+    :param base: the base string to add
+    """
+    # check if the build folder exists and if the registry.ttl file exists
+    if os.path.isdir( location.Location().get_location() + "/build" ) and os.path.isfile( location.Location().get_location() + "/build/registry.ttl" ):
+        # open the registry.ttl file
+        with open( location.Location().get_location() + "/build/registry.ttl", "r" ) as f:
+            # read the file
+            data = f.read()
+        #make string to add => @base <base>    
+        base_string = "@base <" + base + "> ."
+        # open the registry.ttl file
+        with open( location.Location().get_location() + "/build/registry.ttl", "w" ) as f:
+            # write the data
+            f.write( base_string + "\n" + data )
+    else:
+        logger.error("Build folder does not exist")
+    

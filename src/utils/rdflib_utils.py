@@ -1,5 +1,6 @@
 # this file will contain all the helper functions for adding and abstracting data to the registry knowledge base
 from rdflib import Graph, Literal, BNode, URIRef, RDF
+from rdflib.serializer import Serializer
 import os
 import json
 
@@ -21,6 +22,8 @@ class KnowledgeGraphRegistry:
         self.knowledgeGraph = Graph()
         # bind the schema namespace to the prefix schema
         # add triple that states that the current uri ./ is a schema:CreativeWork
+        # add @base to the given base
+        
         self.knowledgeGraph.add(
             (URIRef("./"), RDF.type, URIRef("http://schema.org/CreativeWork"))
         )
@@ -57,7 +60,7 @@ class KnowledgeGraphRegistry:
             )
         )
 
-    def write(self, file_name, format="turtle"):
+    def write(self, file_name, format):
         logger.info(
             msg="Writing Knowledge Graph Registry to file {0}".format(
                 file_name
@@ -70,7 +73,7 @@ class KnowledgeGraphRegistry:
             Location().get_location(), "build", file_name
         )
         self.knowledgeGraph.serialize(
-            destination=destinaton, format=format, base=self._base
+            destination=destinaton, format=format, indent=4
         )
 
     def addJson(self, json):
