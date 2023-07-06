@@ -6,6 +6,14 @@ branding:
   icon: 'git-branch'
   color: 'blue'
 
+# Inputs:
+inputs:
+  # The base URI of the RO-Crate
+  base_uri:
+    description: 'The base URI of the RO-Crate'
+    required: true
+    default: 'https://example.org/fill_in_your_base_uri/'
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
