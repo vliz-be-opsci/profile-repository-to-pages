@@ -7,8 +7,9 @@ ls -a
 
 #echo repo name that called this action
 echo "repo name is " $GITHUB_REPOSITORY
-echo "base uri given is " $INPUT_BASEURI
-
+#get base_uri from .env file 
+INPUT_BASEURI=$(grep -oP '(?<=base_uri=).+' .env)
+echo "base_uri is " $INPUT_BASEURI
 
 tree -a ./src
 
