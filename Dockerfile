@@ -14,6 +14,10 @@ RUN apt-get update && \
 COPY src /src
 COPY requirements.txt /requirements.txt
 
+#make .env file and put base_uri whicj is an argument passed down from the action.yml file
+RUN touch .env
+RUN echo "base_uri=$base_uri" >> .env
+
 #echo the variables that were passed down from the action.yml file
 #RUN echo $token
 #RUN echo $config
