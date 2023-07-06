@@ -8,17 +8,16 @@ from utils.uri_checks import get_url, check_uri
 from utils.jsonld_file import (
     get_metadata_profile,
 )
-from utils.html_build_util import make_html_file, setup_build_folder
+from utils.html_build_util import make_html_file, setup_build_folder, addBaseToRegistry
 from utils.rdflib_utils import KnowledgeGraphRegistry
 from utils.contact import Contact
 from utils.profileharvester import ProfileHarvester
 
 logger = get_logger()
 
-
 # registry class that will hold the registry
 class Registry:
-    def __init__(self, data_path, registry=None):
+    def __init__(self, data_path, registry=None, base=None):
         self.registry = registry
         self.entry_errors = []
         self.entry_warnings = []
@@ -27,7 +26,7 @@ class Registry:
         self.data_path = data_path
         self.profile_registry_array = []
         self.knowledge_graph_registry = KnowledgeGraphRegistry(
-            base="test", knowledgeGraph=None
+            base=base, knowledgeGraph=None
         )
 
     def __repr__(self) -> str:
@@ -70,6 +69,7 @@ class Registry:
             self.knowledge_graph_registry.extractMetadata()
         )
         self.make_html_file_registry()
+        addBaseToRegistry(self.knowledge_graph_registry._base)
 
     def detect_csv_files(self):
         """

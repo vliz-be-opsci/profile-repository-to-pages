@@ -9,6 +9,8 @@ import sys
 from utils.singleton.location import Location
 from utils.singleton.logger import get_logger
 from utils.registry import Registry
+#add argument parser
+from argparse import ArgumentParser
 
 Location(root=os.path.dirname(os.path.abspath(__file__)))
 logger = get_logger()
@@ -24,6 +26,12 @@ logger.info("Start of gh-pages build")
 
 data_path = Path(Location().get_location()) / "data"
 
-registry = Registry(data_path=data_path)
+#parse first argument as base_uri
+parser = ArgumentParser()
+parser.add_argument("base_uri", help="base uri of the registry")
+base_uri = parser.parse_args().base_uri
+logger.info("Base URI: {}".format(base_uri))
+
+registry = Registry(data_path=data_path, base=str(base_uri))
 registry.build()
 registry.report()
