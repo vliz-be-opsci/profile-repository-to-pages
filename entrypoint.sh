@@ -7,6 +7,11 @@ ls -a
 
 #echo repo name that called this action
 echo "repo name is " $GITHUB_REPOSITORY
+
+#echo what is in .env
+echo "contents of .env"
+cat .env
+
 #get base_uri from .env file 
 INPUT_BASEURI=$(grep -oP '(?<=base_uri=).+' .env)
 echo "base_uri is " $INPUT_BASEURI
