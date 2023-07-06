@@ -14,7 +14,7 @@ cat .env
 
 #get base_uri from .env file 
 INPUT_BASEURI=$(grep -oP '(?<=base_uri=).+' .env)
-echo "base_uri is " $INPUT_BASEURI
+echo "base_uri is " $base_uri
 
 tree -a ./src
 
@@ -39,7 +39,7 @@ pip install -r requirements.txt
 
 #run the python script
 cd src/
-python main.py $INPUT_BASEURI
+python main.py $base_uri
 cd ..
 
 #make a folder in ./github/workspace called unicornpages
