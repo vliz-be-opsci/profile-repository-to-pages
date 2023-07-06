@@ -1,6 +1,10 @@
 #python 3.11 image
 FROM python:3.11-bullseye
 
+ARG base_uri
+
+ENV BASE_URI=$base_uri
+
 #install rsync 
 RUN apt-get update && \
     apt-get -y install rsync
@@ -13,15 +17,6 @@ RUN apt-get update && \
 
 COPY src /src
 COPY requirements.txt /requirements.txt
-
-#make .env file and put base_uri whicj is an argument passed down from the action.yml file
-ARG base_uri
-RUN echo $base_uri
-RUN touch .env
-RUN echo "base_uri=$base_uri" >> .env
-
-#print out the contents of the .env file
-RUN cat .env
 
 #echo the variables that were passed down from the action.yml file
 #RUN echo $token

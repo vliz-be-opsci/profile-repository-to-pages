@@ -8,13 +8,7 @@ ls -a
 #echo repo name that called this action
 echo "repo name is " $GITHUB_REPOSITORY
 
-#echo what is in .env
-echo "contents of .env"
-cat .env
-
-#get base_uri from .env file 
-INPUT_BASEURI=$(grep -oP '(?<=base_uri=).+' .env)
-echo "base_uri is " $INPUT_BASEURI
+echo "base_uri is " $BASE_URI
 
 tree -a ./src
 
@@ -39,7 +33,7 @@ pip install -r requirements.txt
 
 #run the python script
 cd src/
-python main.py $INPUT_BASEURI
+python main.py $BASE_URI
 cd ..
 
 #make a folder in ./github/workspace called unicornpages
